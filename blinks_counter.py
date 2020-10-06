@@ -15,14 +15,7 @@ import cv2
 import time
 import blinks_utils
 import packets_client
-  
-# Colors used in code:
-GREEN = (0, 255, 0)
-RED = (0, 0, 255)
-BLUE = (255, 0, 0)
-    
-LIGHT_GREEN = (100, 255, 100)
-LIGHT_RED = (100, 100, 255)
+
 
 # classifier_body = cv2.CascadeClassifier('/home/alberttenigin/projects/cv/model_data/haarcascade_upperbody.xml')
 # classifier_face = cv2.CascadeClassifier('/home/alberttenigin/projects/cv/model_data/haarcascade_frontalface_alt.xml')
