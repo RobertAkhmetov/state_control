@@ -28,26 +28,22 @@ def draw_frame(is_sleeping, is_present, tiredness, ltpresent, ltabscent, amb, lm
     
     if tiredness == 0:
         tiredness_color = GREEN
+    elif tiredness == 1:
+        tiredness_color = LIGHT_GREEN
+    elif tiredness > 1 and tiredness < 4:
+        tiredness_color = YELLOW
     else:
-        if tiredness == 1:
-            tiredness_color = LIGHT_GREEN
-        else:
-            if tiredness > 1 and tiredness < 4:
-                tiredness_color = YELLOW
-            else:
-                tiredness_color = RED
+        tiredness_color = RED
     
-    if width < 600:
+    if width <= 600:
         font_size = 0.5
         font_width = 1
-    else:
-        if width >= 600 and width <= 1200:
-            font_size = 1.0
-            font_width = 2
-        else:
-            if width > 1200:
-                font_size = 1.5
-                font_width = 3
+    elif width > 600 and width <= 1200:
+        font_size = 1.0
+        font_width = 2
+    elif width > 1200:
+        font_size = 1.5
+        font_width = 3
     
     frame = imutils.resize(frame, width)  
     
@@ -120,7 +116,7 @@ def write_average(avg):
     else:
         print('averages.cfg is located')
     try:
-        f.write('\n' + str(int(avg)))
+        f.write(str(int(avg)))
     except FileNotFoundError:
         print('cannot write in averages.cfg!')
         return

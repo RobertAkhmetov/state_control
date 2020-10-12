@@ -15,6 +15,7 @@ import cv2
 import time
 import blinks_utils
 import packets_client
+import math
 
 # classifier_body = cv2.CascadeClassifier('/home/alberttenigin/projects/cv/model_data/haarcascade_upperbody.xml')
 # classifier_face = cv2.CascadeClassifier('/home/alberttenigin/projects/cv/model_data/haarcascade_frontalface_alt.xml')
@@ -31,7 +32,7 @@ TIME_ABSCENT = 0
 LAST_TIME_ABSCENT = time.time()
 TIMEST = time.time()
 
-WIDTH = 1200
+WIDTH = 600
 
 EYE_AR_THRESHOLD = 0.2    # threshold of an eye aspect ratio, lesser than that eye is considered to be closed 
 EYE_AR_CONSEC_FRAMES = 2  # threshold of a closed eye consec frames when the eye considered to blink
@@ -101,7 +102,7 @@ while True:
             IS_SLEEPING = True
     else:
         COUNTER_OPEN += 1
-        if COUNTER >= EYE_AR_CONSEC_FRAMES and COUNTER_OPEN > 2:                
+        if COUNTER >= EYE_AR_CONSEC_FRAMES and COUNTER_OPEN > 2:
             TOTAL += 1
             COUNTER = 0
             IS_SLEEPING = False
@@ -109,42 +110,45 @@ while True:
     if time.time() > TIMEST + 60:
         TIMEST = time.time()
         LMB = TOTAL
-        print('For the last minute there were made ', TOTAL, ' blinks, time: ', TIMEST)
+        print('For the last minute of presence there were made ', TOTAL, ' blinks, time: ', TIMEST)
         print('Real time gone: ', time.strftime("%H:%M:%S", time.localtime(time.time() - INITIAL)))
         TOTALS.append(TOTAL)
 
         TOTAL = 0
+        
     if len(TOTALS) > 0:
-        AMB = sum(TOTALS)/len(TOTALS)
+        AMB = sum(TOTALS) / len(TOTALS)
 
     if len(rects) == 0:
-        TIME_ABSCENT += time.time() - LAST_TIME_ABSCENT
+       # TIME_ABSCENT += math.floor(time.time()) - math.floor(LAST_TIME_ABSCENT)
         LAST_TIME_ABSCENT = time.time() 
         IS_PRESENT = False
+        
     else:
+        if not IS_PRESENT:
+            TIME_ABSCENT = time.time() - LAST_TIME_PRESENT
+            TIMEST += TIME_ABSCENT
         IS_PRESENT = True
-        TIMEST += TIME_ABSCENT
         LAST_TIME_PRESENT = time.time()
         TIME_ABSCENT = 0
 
-    if AMB < standard_amb * 0.9:
+    if LMB < standard_amb * 0.9:
         tiredness = 0
-    elif AMB >= standard_amb * 0.9 and AMB < standard_amb * 1.1:
+    elif LMB >= standard_amb * 0.9 and LMB < standard_amb * 1.1:
         tiredness = 1
-    elif AMB >= standard_amb * 1.1 and AMB < standard_amb * 1.2:
+    elif LMB >= standard_amb * 1.1 and LMB < standard_amb * 1.2:
         tiredness = 2
-    else: 
-                if AMB >= standard_amb * 1.2 and AMB < standard_amb * 1.3:
-                    tiredness = 3
-                else: 
-                    if AMB >= standard_amb * 1.3 and AMB < standard_amb * 1.4:
-                        tiredness = 4
-                    else: 
-                        if AMB >= standard_amb * 1.4:
-                            tiredness = 5
+    elif LMB >= standard_amb * 1.2 and LMB < standard_amb * 1.3:
+        tiredness = 3
+    elif LMB >= standard_amb * 1.3 and LMB < standard_amb * 1.4:
+        tiredness = 4
+    elif LMB >= standard_amb * 1.4:
+        tiredness = 5
                             
-    frame = blinks_utils.draw_frame(IS_SLEEPING, IS_PRESENT, tiredness, time.localtime(LAST_TIME_PRESENT), time.localtime(LAST_TIME_ABSCENT),\
-                       AMB, LMB, TOTAL, frame, WIDTH)
+    frame = blinks_utils.draw_frame(IS_SLEEPING, IS_PRESENT, tiredness,
+                                    time.localtime(LAST_TIME_PRESENT),
+                                    time.localtime(LAST_TIME_ABSCENT),
+                                    AMB, LMB, TOTAL, frame, WIDTH)
     #print('Average number per minute is: ', AMB)
     if IS_SLEEPING:
         sleeping_message = 'Operator is sleeping!'
